@@ -15,6 +15,14 @@ const fastFoods = {
   6: "Chicken Pie"
 };
 
+const price = {
+  "Puff Puff": 200,
+  Suya: 400,
+  Doughnut: 200,
+  Samosa: 300,
+  "Chicken Pie": 500,
+};
+
 const orderHistory = [];
 
 const sessionMiddleware = session({
@@ -76,6 +84,7 @@ io.on("connection", (socket) => {
           case "3":
           case "4":
           case "5":
+          case "6":  
             // Parse the number from the user input and add the corresponding item to the current order
             const selectedIndex = parseInt(message);
             if (fastFoods.hasOwnProperty(selectedIndex)) {
@@ -103,24 +112,34 @@ io.on("connection", (socket) => {
             if (orderHistory.length === 0) {
               await botMessage("No previous orders");
             } else {
-              const orderHistoryString = orderHistory
-                .map(
-                  (order, index) => `${order.join(" \n ")}`
-                )
-                .join("\n");
-              await botMessage(
-                `Order History:\n${orderHistoryString}`
-              );
+              let current = 0;
+
+              for (let food of orderHistory) {
+                let temp = price[food];
+                current += temp;
+              }
+              const orderHistoryString = orderHistory.join(" \n ")
+              await botMessage(`Order History:\n${orderHistoryString}`);
             }
             break;
           case "97":
             if (state.currentOrder.length === 0) {
               await botMessage("No current order");
             } else {
+              let current = 0;
+
+              for (let food of state.currentOrder) {
+                let temp = price[food];
+                current += temp;
+              }
               const currentOrderString = state.currentOrder.join(" \n ");
               await botMessage(
-                `Current Order:\n${currentOrderString}`
+                `Current Order:\n${currentOrderString}\n Total Price: ${current}`
               );
+              // const currentOrderString = state.currentOrder.join(" \n ");
+              // await botMessage(
+              //   `Current Order:\n${currentOrderString}`
+              // );
             }
             break;
           case "0":
